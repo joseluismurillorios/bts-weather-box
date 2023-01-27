@@ -11,8 +11,10 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 #include <ArduinoJson.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+
 #include "WeatherData.h"
-#include "TimeData.h"
 #include "Secrets.h"
 
 // Color definitions
@@ -32,7 +34,6 @@
 #define rst  16
 
 WeatherData weatherData = WeatherData();
-TimeData timeData = TimeData();
 Secrets secrets = Secrets();
 WiFiClient wifiClient;
 
@@ -42,7 +43,19 @@ String units = "metric"; // (options: metric/imperial )
 // Instantiate the TFT constructor with the pin values defined above
 Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, rst);
 
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
+
+//Week Days
+String weekDays[7]={"DOM", "LUN", "MAR", "MIE", "JUE", "VIE", "SAB"};
+
+//Month names
+String months[12]={"ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"};
+
+
 long weatherDataTimer = 0;
+long clockDataTimer = 0;
 
 void setup () {
 
@@ -65,6 +78,8 @@ void setup () {
     Serial.print("Connecting..");
   }
   Serial.println("Connected..");
+  timeClient.begin();
+  timeClient.setTimeOffset(-28800);
 
   tft.fillScreen(BLACK);
   tft.setCursor(36, 80);
@@ -80,6 +95,10 @@ void loop() {
   if (millis() - weatherDataTimer > 60000) {
     initWeather();
     weatherDataTimer = millis();
+  }
+  if (millis() - clockDataTimer > 10000) {
+    displayCurrentTime();
+    clockDataTimer = millis();
   }
 }
 
@@ -165,7 +184,6 @@ void parseWeatherData(String payload) {
   // int cod = root["cod"]; // 200
 
   // tft.fillScreen(BLACK);
-  timeData.parseUnixTime(dt, timezone);
 
   // getCurrentTimeRequest(coord_lat, coord_lon);
   tft.fillScreen(BLACK);
@@ -218,38 +236,67 @@ void drawBTSLogo(uint16 x, uint16 y, uint16 color) {
 
 // TIME
 void displayCurrentTime() {
+  timeClient.update();
+  time_t epochTime = timeClient.getEpochTime();
+  String weekDay = weekDays[timeClient.getDay()];
+  int currentHour = timeClient.getHours();
+
+  int currentMinute = timeClient.getMinutes();
+
+  String ampm = currentHour > 12 ? "PM" : "AM";
+  int currentHours = currentHour > 12 ? currentHour - 12 : currentHour;
+  char timeBuffer[6];
+  sprintf(timeBuffer, " %02d:%02d", currentHours, int(currentMinute));
+  String timeOnly = String(timeBuffer);
+
+  struct tm *ptm = gmtime ((time_t *)&epochTime); 
+
+  int monthDay = ptm->tm_mday;
+  
+  char dayBuffer[6];
+  sprintf(dayBuffer, "%02d", int(monthDay));
+  String dayOnly = String(dayBuffer);
+
+  int currentMonth = ptm->tm_mon+1;
+
+  String monthOnly = months[currentMonth-1];
+  int currentYear = ptm->tm_year+1900;
+  String yearOnly = String(currentYear).substring(2, 4);
+
+  // tft.fillRect(0, 66, tft.width(), tft.height() - 66, CYAN);
+
   tft.setTextSize(3);
   tft.setCursor(2, 66);
 
-  tft.setTextColor(WHITE);
-  tft.print(timeData.timeOnly);
+  tft.setTextColor(WHITE, BLACK);
+  tft.print(timeOnly);
 
-  tft.setTextColor(GREY);
+  tft.setTextColor(GREY, BLACK);
 
   tft.setTextSize(1);
   tft.setCursor(112, 73);
-  tft.print(timeData.ampm);
+  tft.print(ampm);
 
   tft.setTextSize(2);
   tft.setCursor(88, 110);
-  tft.print(timeData.monthOnly);
+  tft.print(monthOnly);
 
   tft.setTextSize(2);
   tft.setCursor(8, 110);
-  tft.print(timeData.day);
+  tft.print(weekDay);
 
   tft.setTextSize(2);
   tft.setCursor(92, 130);
-  tft.print(timeData.yearOnly);
+  tft.print(yearOnly);
 
   tft.setTextSize(2);
   tft.setCursor(12, 130);
-  tft.print(timeData.dayOnly);
+  tft.print(dayOnly);
 }
 
 // TEMPERATURE
 void displayTemperature(float main_temp) {
-  tft.setTextColor(GREY);
+  tft.setTextColor(GREY, BLACK);
   tft.setTextSize(2);
 
   tft.setCursor(8, 14);
