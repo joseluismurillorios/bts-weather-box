@@ -1,5 +1,7 @@
 #include "Arduino.h"
 
+// long int tz = -28800 // - (8 * 60 * 60)
+
 class TimeData {
   public:
     String day = "...";
@@ -7,24 +9,25 @@ class TimeData {
     String monthOnly = "...";
     String yearOnly = "00";
     String dayOnly = "00";
+    String ampm = "AM";
     long int date = 0;
     long int month = 0;
     long int currYear = 0;
     // Function to convert unix time to
     // Human readable format
-    void parseUnixTime(long int seconds) {
+    void parseUnixTime(long int seconds, long int tz) {
       // Number of days in month
       // in normal year
       int daysOfMonth[] = {31, 28, 31, 30, 31, 30,
                           31, 31, 30, 31, 30, 31};
 
+      long int sec = seconds + tz;
       long int daysTillNow, extraTime, extraDays,
-          index, hours, minutes, secondss,
-          flag = 0;
+          index, hours, minutes, flag = 0;
 
       // Calculate total days unix time T
-      daysTillNow = seconds / (24 * 60 * 60);
-      extraTime = seconds % (24 * 60 * 60);
+      daysTillNow = sec / (24 * 60 * 60);
+      extraTime = sec % (24 * 60 * 60);
       currYear = 1970;
 
       // Calculating current year
@@ -98,10 +101,17 @@ class TimeData {
       // Calculating HH:MM:SS
       hours = extraTime / 3600;
       minutes = (extraTime % 3600) / 60;
-      secondss = (extraTime % 3600) % 60;
+      // secondss = (extraTime % 3600) % 60;
+      int hour = hours;
+      if (hour > 12) {
+        ampm = "PM";
+      } else {
+        ampm = "AM";
+      }
 
+      int currentHours = hour > 12 ? hour - 12 : hour;
       char timeBuffer[6];
-      sprintf(timeBuffer, " %02d:%02d", int(hours - 8), int(minutes));
+      sprintf(timeBuffer, " %02d:%02d", currentHours, int(minutes));
       timeOnly = String(timeBuffer);
       Serial.println(timeOnly);
       Serial.println(currYear);

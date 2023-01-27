@@ -151,7 +151,8 @@ void parseWeatherData(String payload) {
 
   // int clouds_all = root["clouds"]["all"]; // 68
 
-  long dt = root["dt"]; // 1551023165
+  long dt = root["dt"]; // 1674828900
+  long timezone = root["timezone"]; // -28800
 
   JsonObject& sys = root["sys"];
   // float sys_message = sys["message"]; // 0.0077
@@ -164,7 +165,7 @@ void parseWeatherData(String payload) {
   // int cod = root["cod"]; // 200
 
   // tft.fillScreen(BLACK);
-  timeData.parseUnixTime(dt);
+  timeData.parseUnixTime(dt, timezone);
 
   // getCurrentTimeRequest(coord_lat, coord_lon);
   tft.fillScreen(BLACK);
@@ -224,6 +225,11 @@ void displayCurrentTime() {
   tft.print(timeData.timeOnly);
 
   tft.setTextColor(GREY);
+
+  tft.setTextSize(1);
+  tft.setCursor(112, 73);
+  tft.print(timeData.ampm);
+
   tft.setTextSize(2);
   tft.setCursor(88, 110);
   tft.print(timeData.monthOnly);
@@ -247,7 +253,8 @@ void displayTemperature(float main_temp) {
   tft.setTextSize(2);
 
   tft.setCursor(8, 14);
-  String temperatureValue = String((int)main_temp) + (char)247 + "C";
+  // String temperatureValue = String((int)main_temp) + (char)247 + "C";
+  String temperatureValue = String((int)main_temp) + "C";
   tft.print(temperatureValue);
 }
 
