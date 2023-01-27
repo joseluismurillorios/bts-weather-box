@@ -253,9 +253,21 @@ void displayTemperature(float main_temp) {
   tft.setTextSize(2);
 
   tft.setCursor(8, 14);
-  // String temperatureValue = String((int)main_temp) + (char)247 + "C";
-  String temperatureValue = String((int)main_temp) + "C";
+  String temperatureValue = String((int)main_temp) + (char)247 + "C";
+  // String temperatureValue = String((int)main_temp) + " C";
+  // char tempCBuffer[3];
+  // sprintf(tempCBuffer, "%02d", (int)main_temp);
+  // String tempCOnly = String(tempCBuffer) + "C";
+  // tft.print(tempCOnly);
   tft.print(temperatureValue);
+
+  // // String temperatureValueF = String((int)(main_temp * 9/5) + 32) + "F";
+  // char tempFBuffer[3];
+  // sprintf(tempFBuffer, "%02d", (int)(main_temp * 9/5) + 32);
+  // String tempFOnly = String(tempFBuffer) + "F";
+  // tft.setTextSize(1);
+  // tft.setCursor(44, 18);
+  // tft.print(tempFOnly);
 }
 
 // ICON
