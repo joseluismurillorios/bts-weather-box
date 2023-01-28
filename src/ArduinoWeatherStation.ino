@@ -96,7 +96,7 @@ void loop() {
     initWeather();
     weatherDataTimer = millis();
   }
-  if (millis() - clockDataTimer > 10000) {
+  if (millis() - clockDataTimer > 2000) {
     displayCurrentTime();
     clockDataTimer = millis();
   }
@@ -266,7 +266,7 @@ void displayCurrentTime() {
   // tft.fillRect(0, 66, tft.width(), tft.height() - 66, CYAN);
 
   tft.setTextSize(3);
-  tft.setCursor(2, 66);
+  tft.setCursor(4, 66);
 
   tft.setTextColor(WHITE, BLACK);
   tft.print(timeOnly);
@@ -274,7 +274,7 @@ void displayCurrentTime() {
   tft.setTextColor(GREY, BLACK);
 
   tft.setTextSize(1);
-  tft.setCursor(112, 73);
+  tft.setCursor(114, 73);
   tft.print(ampm);
 
   tft.setTextSize(2);
