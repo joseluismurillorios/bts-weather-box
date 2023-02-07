@@ -14,6 +14,9 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
+#include <ESPAsyncWebServer.h>     //Local WebServer used to serve the configuration portal
+#include <ESPAsyncWiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
+
 #include "WeatherData.h"
 #include "Secrets.h"
 
@@ -63,7 +66,6 @@ void setup () {
 
   Wire.begin();
 
-  // tft.initR(INITR_BLACKTAB);   // initialize a ST7735S chip, black tab
   tft.initR(INITR_GREENTAB);   // initialize a ST7735S chip, black tab
   tft.fillScreen(ST77XX_BLACK);
   tft.setCursor(30, 80);
@@ -71,12 +73,21 @@ void setup () {
   tft.setTextSize(1);
   tft.print("Connecting...");
 
-  WiFi.begin(secrets.ssid, secrets.password);
+  AsyncWebServer server(80);
+  DNSServer dns;
+  AsyncWiFiManager wifiManager(&server,&dns);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print("Connecting..");
-  }
+  wifiManager.autoConnect("BTS 💜", "loveyourself");
+	wifiManager.setConnectTimeout(30);
+	// wifiManager.setBreakAfterConfig(true);
+	// wifiManager.setTryConnectDuringConfigPortal(false);
+
+  // WiFi.begin(secrets.ssid, secrets.password);
+
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(1000);
+  //   Serial.print("Connecting..");
+  // }
   Serial.println("Connected..");
   timeClient.begin();
   timeClient.setTimeOffset(-28800);
