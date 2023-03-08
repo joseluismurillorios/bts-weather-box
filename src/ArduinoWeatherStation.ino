@@ -32,9 +32,22 @@
 #define GREY     0xC618
 
 // Define pins that will be used as parameters in the TFT constructor
-#define cs   5
-#define dc   4
-#define rst  16
+// ## Pinout
+
+// | Wemos D1 Mini | TFT LCD       |
+// | ------------- |:-------------:|
+// | D1      5     | CS            |
+// | D2      4     | DC   AO       |
+// | D0      16    | RES           |
+// | D5      14    | SCL  SCK      |
+// | D7      13    | SDA           |
+// | 3v3           | VCC           |
+// | G             | GND           |
+// | Any Pin (5V)  | Backlight     |
+
+#define cs   5 // D1
+#define dc   4 // D2
+#define rst  16 // D0
 
 WeatherData weatherData = WeatherData();
 Secrets secrets = Secrets();
